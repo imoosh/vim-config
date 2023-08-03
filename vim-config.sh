@@ -3,15 +3,32 @@
 
 VI=""
 VIM=""
+CTAGS=""
 PWD=$(readlink -f "$(dirname "$0")")
+
+function install_ctags() {
+    local result=$(uname -s 2>/dev/null)
+    if [[ "$result" = "Darwin" ]]; then
+        brew install -y ctags        
+    elif [[ "$result" = "Linux" ]]; then
+        os=$(head -1 /etc/os-release) 
+        if [[ "$os" =~ "Ubuntu" ]]; then
+            apt install -y ctags
+        elif [[ "$os" =~ "CentOS" ]]; then
+            yum install -y ctags
+        elif [[ "$os" =~ "Alpine" ]]; then
+            apk add --no-cache ctags
+        fi
+    fi
+}
 
 function check_vim() {
     VI=$(which vi 2>/dev/null)
     VIM=$(which vim 2>/dev/null)
-    if [ -z "$VI" ] || [ -z "$VIM" ]; then
-        echo "please install vi/vim first"
-        exit 1
-    fi
+    CTAGS=$(which ctags 2>/dev/null)
+    [ -z "$VI" ] && echo "please install vi first" && exit 1
+    [ -z "$VIM" ] && echo "please install vim first" && exit 1
+    [ -z "$CTAGS" ] && echo "please install ctags first" && exit 1
 }
 
 function backup_vimconfig() {
